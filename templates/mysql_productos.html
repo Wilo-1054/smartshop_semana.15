@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}Productos MySQL — SmartShop{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <i class="bi bi-database-fill fs-2 text-danger"></i>
+    <div>
+      <h4 class="fw-bold mb-0">Gestión con MySQL</h4>
+      <p class="text-muted small mb-0">Conexión directa mediante mysql-connector-python</p>
+    </div>
+    <div class="ms-auto d-flex gap-2">
+      <a href="{{ url_for('mysql_test') }}" class="btn btn-sm btn-outline-success">
+        <i class="bi bi-wifi"></i> Probar conexión
+      </a>
+      {% if usuario %}
+      <a href="{{ url_for('reporte_pdf') }}" class="btn btn-sm btn-danger">
+        <i class="bi bi-file-earmark-pdf"></i> Descargar Reporte PDF
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if not mysql_ok %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <strong>No se pudo conectar a MySQL.</strong>
+    <br><small>{{ error_msg }}</small>
+    <hr>
+    <p class="mb-0 small">
+      Asegúrate de que MySQL esté corriendo y ejecuta primero:
+      <code>python setup_mysql.py</code><br>
+      Luego ajusta el archivo <code>conexion/conexion.py</code> con tus credenciales.
+    </p>
+  </div>
+  {% endif %}
+
+  <!-- ESTADÍSTICAS -->
+  {% if mysql_ok %}
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card p-3 stat-card">
+        <div class="d-flex align-items-center gap-3">
+          <i class="bi bi-box-seam fs-2 text-primary"></i>
+          <div>
+            <div class="text-muted small">Productos MySQL</div>
+            <div class="fs-4 fw-bold">{{ resumen.total_productos }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 stat-card" style="border-color:#198754">
+        <div class="d-flex align-items-center gap-3">
+          <i class="bi bi-stack fs-2 text-success"></i>
+          <div>
+            <div class="text-muted small">Unidades en stock</div>
+            <div class="fs-4 fw-bold">{{ resumen.total_unidades }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 stat-card" style="border-color:#ffc107">
+        <div class="d-flex align-items-center gap-3">
+          <i class="bi bi-currency-dollar fs-2 text-warning"></i>
+          <div>
+            <div class="text-muted small">Valor total</div>
+            <div class="fs-4 fw-bold">${{ "%.2f"|format(resumen.valor_total|float) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row g-4">
+
+    <!-- TABLA -->
+    <div class="col-lg-8">
+      <div class="card p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-table"></i> Tabla <code>productos_mysql</code></h5>
+
+        {% if productos %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr><th>#ID</th><th>Nombre</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th>
+              {% if usuario %}<th>Acciones</th>{% endif %}</tr>
+            </thead>
+            <tbody>
+              {% for p in productos %}
+              <tr>
+                <td><span class="badge bg-danger">{{ p.id }}</span></td>
+                <td class="fw-semibold">{{ p.nombre }}</td>
+                <td>
+                  {% if p.cantidad == 0 %}
+                    <span class="badge bg-danger">Sin stock</span>
+                  {% elif p.cantidad < 5 %}
+                    <span class="badge bg-warning text-dark">{{ p.cantidad }}</span>
+                  {% else %}
+                    <span class="badge bg-success">{{ p.cantidad }}</span>
+                  {% endif %}
+                </td>
+                <td>${{ "%.2f"|format(p.precio|float) }}</td>
+                <td class="text-muted">${{ "%.2f"|format((p.cantidad * p.precio)|float) }}</td>
+                {% if usuario %}
+                <td>
+                  <a href="{{ url_for('mysql_editar_producto', pid=p.id) }}"
+                     class="btn btn-sm btn-outline-warning me-1">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <form method="POST" action="{{ url_for('mysql_eliminar_producto', pid=p.id) }}"
+                        class="d-inline" onsubmit="return confirm('¿Eliminar {{ p.nombre }}?')">
+                    <button class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+                {% endif %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">
+              {% if mysql_ok %}No hay productos en MySQL todavía.
+              {% else %}Conecta MySQL para ver los datos.{% endif %}
+            </p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Explicación técnica -->
+      <div class="card p-4 mt-3">
+        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle text-danger"></i> Cómo funciona la conexión MySQL</h6>
+        <p class="text-muted small mb-2">
+          El módulo <code>conexion/conexion.py</code> centraliza los parámetros de conexión
+          (<code>host</code>, <code>user</code>, <code>password</code>, <code>database</code>).
+          La función <code>get_connection()</code> usa <strong>mysql-connector-python</strong>
+          para abrir una conexión; <code>close_connection()</code> la cierra de forma segura.
+        </p>
+        <p class="text-muted small mb-0">
+          Todas las consultas usan <strong>parámetros posicionales</strong> (<code>%s</code>)
+          para prevenir inyección SQL. El diccionario <code>cursor=conn.cursor(dictionary=True)</code>
+          retorna filas como <code>dict</code> para facilitar el uso en las plantillas Jinja2.
+        </p>
+      </div>
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="col-lg-4">
+      {% if usuario and mysql_ok %}
+      <div class="card p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle"></i> Agregar producto (MySQL)</h5>
+        <form method="POST" action="{{ url_for('mysql_agregar_producto') }}">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre</label>
+            <input type="text" name="nombre" class="form-control" required placeholder="Ej: Laptop">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Cantidad</label>
+            <input type="number" name="cantidad" class="form-control" required min="0" placeholder="0">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Precio ($)</label>
+            <input type="number" name="precio" class="form-control" required min="0" step="0.01" placeholder="0.00">
+          </div>
+          <button class="btn btn-danger w-100">
+            <i class="bi bi-floppy"></i> Guardar en MySQL
+          </button>
+        </form>
+      </div>
+      {% elif not usuario %}
+      <div class="card p-4 text-center text-muted">
+        <i class="bi bi-lock-fill fs-1 mb-3"></i>
+        <p>Inicia sesión para administrar productos MySQL.</p>
+        <a href="{{ url_for('login') }}" class="btn btn-primary">
+          <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+        </a>
+      </div>
+      {% endif %}
+
+      <!-- Links rápidos -->
+      <div class="card p-4 mt-3">
+        <h6 class="fw-bold mb-2"><i class="bi bi-link-45deg"></i> Tablas MySQL</h6>
+        <div class="d-grid gap-2">
+          <a href="{{ url_for('mysql_productos') }}" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-box-seam"></i> Productos
+          </a>
+          <a href="{{ url_for('mysql_usuarios') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-people"></i> Usuarios
+          </a>
+          {% if usuario %}
+          <a href="{{ url_for('reporte_pdf') }}" class="btn btn-danger btn-sm">
+            <i class="bi bi-file-earmark-pdf-fill"></i> Reporte PDF
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

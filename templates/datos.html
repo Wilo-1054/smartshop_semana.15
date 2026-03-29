@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Persistencia Archivos — SmartShop{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <i class="bi bi-file-earmark-text fs-2 text-secondary"></i>
+    <div>
+      <h4 class="fw-bold mb-0">Persistencia en Archivos</h4>
+      <p class="text-muted small mb-0">Guarda productos en formato TXT, JSON o CSV</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- FORMULARIO -->
+    <div class="col-lg-4">
+      {% if usuario %}
+      <div class="card p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle"></i> Guardar registro</h5>
+        <form method="POST" action="{{ url_for('datos') }}">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre</label>
+            <input type="text" name="nombre" class="form-control" required placeholder="Ej: Monitor">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Cantidad</label>
+            <input type="number" name="cantidad" class="form-control" required min="0" placeholder="0">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Precio ($)</label>
+            <input type="number" name="precio" class="form-control" required min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Formato</label>
+            <select name="formato" class="form-select">
+              <option value="txt">📄 TXT (texto plano)</option>
+              <option value="json">🗂️ JSON</option>
+              <option value="csv">📊 CSV</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary w-100">
+            <i class="bi bi-floppy"></i> Guardar en archivo
+          </button>
+        </form>
+      </div>
+      {% else %}
+      <div class="card p-4 text-center text-muted">
+        <i class="bi bi-lock-fill fs-1 mb-3"></i>
+        <p>Inicia sesión para guardar registros.</p>
+        <a href="{{ url_for('login') }}" class="btn btn-primary">
+          <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- DATOS GUARDADOS -->
+    <div class="col-lg-8">
+
+      <!-- TXT -->
+      <div class="card p-4 mb-3">
+        <h5 class="fw-bold mb-3"><i class="bi bi-file-text text-secondary"></i> Archivo TXT</h5>
+        {% if datos_txt %}
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0">
+            <thead><tr><th>Nombre</th><th>Cantidad</th><th>Precio</th></tr></thead>
+            <tbody>
+              {% for d in datos_txt %}
+              <tr>
+                <td>{{ d.nombre }}</td>
+                <td>{{ d.cantidad }}</td>
+                <td>${{ d.precio }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted small mb-0"><i class="bi bi-inbox"></i> Sin datos TXT todavía.</p>
+        {% endif %}
+      </div>
+
+      <!-- JSON -->
+      <div class="card p-4 mb-3">
+        <h5 class="fw-bold mb-3"><i class="bi bi-filetype-json text-warning"></i> Archivo JSON</h5>
+        {% if datos_json %}
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0">
+            <thead><tr><th>Nombre</th><th>Cantidad</th><th>Precio</th></tr></thead>
+            <tbody>
+              {% for d in datos_json %}
+              <tr>
+                <td>{{ d.nombre }}</td>
+                <td>{{ d.cantidad }}</td>
+                <td>${{ d.precio }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted small mb-0"><i class="bi bi-inbox"></i> Sin datos JSON todavía.</p>
+        {% endif %}
+      </div>
+
+      <!-- CSV -->
+      <div class="card p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-filetype-csv text-success"></i> Archivo CSV</h5>
+        {% if datos_csv %}
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0">
+            <thead><tr><th>Nombre</th><th>Cantidad</th><th>Precio</th></tr></thead>
+            <tbody>
+              {% for d in datos_csv %}
+              <tr>
+                <td>{{ d.nombre }}</td>
+                <td>{{ d.cantidad }}</td>
+                <td>${{ d.precio }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted small mb-0"><i class="bi bi-inbox"></i> Sin datos CSV todavía.</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

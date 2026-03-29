@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Usuarios MySQL — SmartShop{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <i class="bi bi-people-fill fs-2 text-secondary"></i>
+    <div>
+      <h4 class="fw-bold mb-0">Gestión de Usuarios — MySQL</h4>
+      <p class="text-muted small mb-0">Tabla <code>usuarios</code> en la base de datos MySQL</p>
+    </div>
+    <div class="ms-auto">
+      <a href="{{ url_for('mysql_productos') }}" class="btn btn-sm btn-outline-danger">
+        <i class="bi bi-box-seam"></i> Ver Productos
+      </a>
+    </div>
+  </div>
+
+  {% if not mysql_ok %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <strong>No se pudo conectar a MySQL.</strong>
+    <br><small>{{ error_msg }}</small>
+  </div>
+  {% endif %}
+
+  <div class="row g-4">
+
+    <!-- TABLA USUARIOS -->
+    <div class="col-lg-8">
+      <div class="card p-4">
+        <h5 class="fw-bold mb-3">
+          <i class="bi bi-table"></i> Tabla <code>usuarios</code>
+          <span class="badge bg-secondary ms-2">{{ usuarios|length }} registros</span>
+        </h5>
+
+        {% if usuarios %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>#ID</th><th>Nombre</th><th>Email</th><th>Creado</th>
+                {% if usuario %}<th>Acciones</th>{% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in usuarios %}
+              <tr>
+                <td><span class="badge bg-secondary">{{ u.id_usuario }}</span></td>
+                <td class="fw-semibold">{{ u.nombre }}</td>
+                <td><i class="bi bi-envelope text-muted me-1"></i>{{ u.mail }}</td>
+                <td class="text-muted small">{{ u.creado_en }}</td>
+                {% if usuario %}
+                <td>
+                  <a href="{{ url_for('mysql_editar_usuario', uid=u.id_usuario) }}"
+                     class="btn btn-sm btn-outline-warning me-1">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <form method="POST" action="{{ url_for('mysql_eliminar_usuario', uid=u.id_usuario) }}"
+                        class="d-inline" onsubmit="return confirm('¿Eliminar usuario {{ u.nombre }}?')">
+                    <button class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+                {% endif %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-person-x fs-1"></i>
+            <p class="mt-2">No hay usuarios registrados en MySQL.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Estructura de la tabla -->
+      <div class="card p-4 mt-3">
+        <h6 class="fw-bold mb-2"><i class="bi bi-code-square text-secondary"></i> Estructura de la tabla</h6>
+        <pre class="bg-light p-3 rounded small mb-0"><code>CREATE TABLE usuarios (
+  id_usuario  INT          AUTO_INCREMENT PRIMARY KEY,
+  nombre      VARCHAR(100) NOT NULL,
+  mail        VARCHAR(150) NOT NULL UNIQUE,
+  password    VARCHAR(255) NOT NULL,
+  creado_en   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+);</code></pre>
+      </div>
+    </div>
+
+    <!-- FORMULARIO AGREGAR USUARIO -->
+    <div class="col-lg-4">
+      {% if usuario and mysql_ok %}
+      <div class="card p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-person-plus"></i> Agregar usuario</h5>
+        <form method="POST" action="{{ url_for('mysql_agregar_usuario') }}">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre completo</label>
+            <input type="text" name="nombre" class="form-control" required placeholder="Ej: Ana García">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Correo electrónico</label>
+            <input type="email" name="mail" class="form-control" required placeholder="ana@correo.com">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Contraseña</label>
+            <input type="password" name="password" class="form-control" required placeholder="••••••••">
+          </div>
+          <button class="btn btn-secondary w-100">
+            <i class="bi bi-person-check"></i> Registrar usuario
+          </button>
+        </form>
+      </div>
+      {% elif not usuario %}
+      <div class="card p-4 text-center text-muted">
+        <i class="bi bi-lock-fill fs-1 mb-3"></i>
+        <p>Inicia sesión para administrar usuarios.</p>
+        <a href="{{ url_for('login') }}" class="btn btn-primary">
+          <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

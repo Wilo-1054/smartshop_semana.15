@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Productos ORM — SmartShop{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <i class="bi bi-database fs-2 text-primary"></i>
+    <div>
+      <h4 class="fw-bold mb-0">Gestión con SQLAlchemy ORM</h4>
+      <p class="text-muted small mb-0">Tabla <code>productos_orm</code> — SQLite vía ORM</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- TABLA ORM -->
+    <div class="col-lg-8">
+      <div class="card p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-table"></i> Productos (ORM)</h5>
+
+        {% if productos %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>#ID</th><th>Nombre</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th>
+                {% if usuario %}<th>Acciones</th>{% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in productos %}
+              <tr>
+                <td><span class="badge bg-primary">{{ p.id }}</span></td>
+                <td class="fw-semibold">{{ p.nombre }}</td>
+                <td>
+                  {% if p.cantidad == 0 %}
+                    <span class="badge bg-danger">Sin stock</span>
+                  {% elif p.cantidad < 5 %}
+                    <span class="badge bg-warning text-dark">{{ p.cantidad }}</span>
+                  {% else %}
+                    <span class="badge bg-success">{{ p.cantidad }}</span>
+                  {% endif %}
+                </td>
+                <td>${{ "%.2f"|format(p.precio) }}</td>
+                <td class="text-muted">${{ "%.2f"|format(p.cantidad * p.precio) }}</td>
+                {% if usuario %}
+                <td>
+                  <a href="{{ url_for('editar_orm', pid=p.id) }}"
+                     class="btn btn-sm btn-outline-warning me-1">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <form method="POST" action="{{ url_for('eliminar_orm', pid=p.id) }}"
+                        class="d-inline" onsubmit="return confirm('¿Eliminar {{ p.nombre }}?')">
+                    <button class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+                {% endif %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-1"></i>
+          <p class="mt-2">No hay productos ORM todavía. ¡Agrega el primero!</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Explicación técnica -->
+      <div class="card p-4 mt-3">
+        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle text-primary"></i> ¿Qué es SQLAlchemy ORM?</h6>
+        <p class="text-muted small mb-0">
+          SQLAlchemy ORM permite trabajar con la base de datos usando <strong>objetos Python</strong>
+          en lugar de escribir SQL directamente. La clase <code>ProductoORM</code> mapea
+          la tabla <code>productos_orm</code>. Las operaciones CRUD se realizan con
+          <code>db.session.add()</code>, <code>db.session.delete()</code> y
+          <code>db.session.commit()</code>.
+        </p>
+      </div>
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="col-lg-4">
+      {% if usuario %}
+      <div class="card p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle"></i> Agregar producto (ORM)</h5>
+        <form method="POST" action="{{ url_for('agregar_orm') }}">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre</label>
+            <input type="text" name="nombre" class="form-control"
+                   required placeholder="Ej: Laptop">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Cantidad</label>
+            <input type="number" name="cantidad" class="form-control"
+                   required min="0" placeholder="0">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Precio ($)</label>
+            <input type="number" name="precio" class="form-control"
+                   required min="0" step="0.01" placeholder="0.00">
+          </div>
+          <button class="btn btn-primary w-100">
+            <i class="bi bi-floppy"></i> Guardar vía ORM
+          </button>
+        </form>
+      </div>
+      {% else %}
+      <div class="card p-4 text-center text-muted">
+        <i class="bi bi-lock-fill fs-1 mb-3"></i>
+        <p>Inicia sesión para administrar productos ORM.</p>
+        <a href="{{ url_for('login') }}" class="btn btn-primary">
+          <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

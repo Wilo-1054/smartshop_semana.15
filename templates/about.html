@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Acerca de — SmartShop{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card p-4">
+        <div class="text-center mb-4">
+          <i class="bi bi-shop fs-1 text-primary"></i>
+          <h3 class="fw-bold mt-2">SmartShop</h3>
+          <p class="text-muted">Sistema de Gestión de Inventario — 2026</p>
+        </div>
+
+        <h5 class="fw-bold"><i class="bi bi-stack text-primary"></i> Tecnologías utilizadas</h5>
+        <ul class="list-group list-group-flush mb-4">
+          <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>
+            <strong>Flask</strong> — Framework web Python</li>
+          <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>
+            <strong>SQLite</strong> — Base de datos embebida (inventario principal)</li>
+          <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>
+            <strong>SQLAlchemy ORM</strong> — Mapeo objeto-relacional</li>
+          <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>
+            <strong>MySQL</strong> — Base de datos relacional (módulo avanzado)</li>
+          <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>
+            <strong>Archivos</strong> — Persistencia en TXT, JSON y CSV</li>
+          <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>
+            <strong>ReportLab</strong> — Generación de reportes PDF</li>
+          <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>
+            <strong>Bootstrap 5</strong> — Interfaz responsiva</li>
+        </ul>
+
+        <h5 class="fw-bold"><i class="bi bi-diagram-3 text-primary"></i> Arquitectura del proyecto</h5>
+        <pre class="bg-light p-3 rounded small"><code>smartshop/
+├── app.py                  ← Controlador Flask (rutas)
+├── mysql_crud.py           ← CRUD MySQL
+├── setup_mysql.py          ← Inicialización MySQL
+├── inventario/
+│   ├── inventario.py       ← Clase Inventario (SQLite)
+│   ├── bd.py               ← Modelos SQLAlchemy
+│   └── productos.py        ← Persistencia TXT/JSON/CSV
+├── conexion/
+│   └── conexion.py         ← Conexión MySQL
+├── reportes/
+│   └── reporte_pdf.py      ← Generador PDF
+└── templates/              ← Plantillas Jinja2</code></pre>
+
+        <div class="text-center mt-3">
+          <a href="{{ url_for('home') }}" class="btn btn-primary">
+            <i class="bi bi-house"></i> Volver al inicio
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
